@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const controller_1 = require("./controller");
+const router = (0, express_1.Router)();
+router.get("/", controller_1.listLeadsController);
+router.post("/", controller_1.createLeadController);
+router.post("/preview", controller_1.previewLeadController);
+router.post("/unlock", controller_1.unlockLeadController);
+router.post("/top-up", controller_1.topUpController);
+router.get("/wallet", controller_1.walletController);
+router.get("/balance", controller_1.walletController);
+router.get("/ledger", controller_1.ledgerController);
+router.post("/refunds", controller_1.requestRefundController);
+router.get("/refunds", controller_1.listRefundsController);
+exports.default = router;

@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const controller_1 = require("./controller");
+const router = (0, express_1.Router)();
+router.post("/paint", controller_1.paintCalculatorController);
+router.post("/wallpaper", controller_1.wallpaperCalculatorController);
+router.post("/surface-area", controller_1.surfaceAreaController);
+router.post("/quote-template", controller_1.quoteTemplateController);
+router.post("/budget-estimator", controller_1.budgetEstimatorController);
+router.get("/prep-checklist", controller_1.prepChecklistController);
+router.get("/colour-guide", controller_1.colourGuideController);
+exports.default = router;

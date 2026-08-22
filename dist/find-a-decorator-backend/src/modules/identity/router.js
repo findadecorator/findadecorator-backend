@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const controller_1 = require("./controller");
+const router = (0, express_1.Router)();
+router.post("/register", controller_1.registerController);
+router.post("/signup", controller_1.registerController);
+router.post("/login", controller_1.loginController);
+router.post("/logout", controller_1.logoutController);
+router.get("/me", controller_1.meController);
+router.post("/verify-email", controller_1.verifyEmailController);
+router.post("/verify", controller_1.verifyEmailController);
+router.post("/forgot-password", controller_1.forgotPasswordController);
+router.post("/reset-password", controller_1.resetPasswordController);
+router.post("/reset", controller_1.resetPasswordController);
+router.post("/mfa/admin/challenge", (_req, res) => res.json({ required: true, channel: "authenticator-app" }));
+router.post("/mfa/admin/verify", controller_1.adminMfaController);
+exports.default = router;

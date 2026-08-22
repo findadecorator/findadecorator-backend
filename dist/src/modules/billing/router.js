@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const controller_1 = require("./controller");
+const router = (0, express_1.Router)();
+router.post("/checkout", controller_1.checkoutController);
+router.post("/webhook", controller_1.webhookController);
+router.get("/invoices", controller_1.invoicesController);
+router.get("/receipts/:invoiceId", controller_1.receiptsController);
+router.post("/receipts/email", controller_1.receiptEmailController);
+router.get("/statements", controller_1.statementsController);
+router.get("/vat-summary", controller_1.vatSummaryController);
+router.post("/refunds", controller_1.refundController);
+router.get("/refunds", controller_1.listRefundsController);
+exports.default = router;
