@@ -1,22 +1,41 @@
-import { calculateDeterministicLeadPrice } from "../../../pricing-engine/engine";
-import { getActivePricingRuleVersion, listPricingRuleVersions } from "../../../pricing-engine/versioning";
+import { listPricingRules } from "@pricing/rules";
+import { applyPricingEngine } from "@pricing/engine";
+import { getPricingVersion, listPricingRuleVersions } from "@pricing/versioning";
 
-export function calculatePrice(input: {
-  jobSize: "small" | "medium" | "large";
-  leadClass: "standard" | "premium" | "high-value" | "exclusive";
-  distanceBand: "local" | "regional" | "long_distance";
-  complexityBand: "low" | "medium" | "high";
-  timingBand: "flexible" | "normal" | "urgent";
-  qualityBand: "standard" | "premium";
+function makeId(prefix: string) {
+  return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+export function listPricing() {
+  const rules = listPricingRules();
+  const version = getPricingVersion();
+
+  return {
+    version,
+    rules
+  };
+}
+
+export function simulatePricing(input: {
+  customerId: string;
+  professionalId: string;
+  description: string;
 }) {
-  return calculateDeterministicLeadPrice(input);
+  const lead = {
+    id: makeId("lead"),
+    customerId: input.customerId,
+    professionalId: input.professionalId,
+    description: input.description,
+    createdAt: new Date().toISOString(),
+    status: "simulation"
+  };
+
+  const rules = listPricingRules();
+  const version = getPricingVersion();
+
+  return applyPricingEngine(lead, rules, version);
 }
 
-export function getRules() {
-  return getActivePricingRuleVersion();
-}
-
-export function getRuleVersions() {
+export function listPricingVersions() {
   return listPricingRuleVersions();
 }
-
