@@ -4,14 +4,10 @@
     "module": "commonjs",
     "moduleResolution": "node",
 
-    "rootDir": ".",
-    "outDir": "./dist/find-a-decorator-backend",
+    "rootDir": "src",
+    "outDir": "./dist",
 
-    "baseUrl": ".", 
-    "paths": {
-      "@pricing/*": ["pricing-engine/*"],
-      "@src/*": ["src/*"]
-    },
+    "baseUrl": ".",
 
     "strict": true,
     "esModuleInterop": true,

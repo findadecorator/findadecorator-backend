@@ -1,6 +1,6 @@
-import { listPricingRules } from "@pricing/rules";
-import { applyPricingEngine } from "@pricing/engine";
-import { getPricingVersion, listPricingRuleVersions } from "@pricing/versioning";
+import { listPricingRules } from "../../pricing-engine/rules";
+import { applyPricingEngine } from "../../pricing-engine/engine";
+import { getPricingVersion, listPricingRuleVersions } from "../../pricing-engine/versioning";
 
 function makeId(prefix: string) {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;

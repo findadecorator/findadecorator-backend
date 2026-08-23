@@ -12,7 +12,11 @@ function makeId(prefix: string) {
 
 export function listVerificationQueue() {
   if (!verificationQueue.length) {
-    verificationQueue.push({ id: makeId("verify"), professionalId: "pro_01", status: "pending" });
+    verificationQueue.push({
+      id: makeId("verify"),
+      professionalId: "pro_01",
+      status: "pending"
+    });
   }
   return verificationQueue;
 }
@@ -22,7 +26,9 @@ export function listModerationQueue() {
 }
 
 export function listRefundQueue() {
-  return [...listLeadRefunds(), ...listBillingRefunds()].filter((refund: any) => refund.status === "pending");
+  return [...listLeadRefunds(), ...listBillingRefunds()].filter(
+    (refund: any) => refund.status === "pending"
+  );
 }
 
 export function listFraudQueue() {
@@ -43,11 +49,39 @@ export function getMarketplaceMetrics() {
   const leads = listLeads();
   const reviews = listReviews();
   const refundQueue = listRefundQueue();
-  const leadsToday = leads.filter((lead) => lead.createdAt && new Date(lead.createdAt).toDateString() === new Date().toDateString()).length;
-  const leadsThisWeek = leads.filter((lead) => lead.createdAt && Date.now() - new Date(lead.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000).length;
-  const leadsThisMonth = leads.filter((lead) => lead.createdAt && Date.now() - new Date(lead.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000).length;
-  const conversionRate = leads.length ? Number(((leads.filter((lead) => lead.status === "quoted" || lead.status === "booked").length / leads.length) * 100).toFixed(2)) : 0;
-  const refundRate = refundQueue.length ? Number(((refundQueue.length / Math.max(1, leads.length)) * 100).toFixed(2)) : 0;
+
+  const leadsToday = leads.filter(
+    (lead) =>
+      lead.createdAt &&
+      new Date(lead.createdAt).toDateString() === new Date().toDateString()
+  ).length;
+
+  const leadsThisWeek = leads.filter(
+    (lead) =>
+      lead.createdAt &&
+      Date.now() - new Date(lead.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000
+  ).length;
+
+  const leadsThisMonth = leads.filter(
+    (lead) =>
+      lead.createdAt &&
+      Date.now() - new Date(lead.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000
+  ).length;
+
+  const conversionRate = leads.length
+    ? Number(
+        (
+          (leads.filter((lead) => lead.status === "quoted" || lead.status === "booked").length /
+            leads.length) *
+          100
+        ).toFixed(2)
+      )
+    : 0;
+
+  const refundRate = refundQueue.length
+    ? Number(((refundQueue.length / Math.max(1, leads.length)) * 100).toFixed(2))
+    : 0;
+
   return {
     totalLeads: leads.length,
     liveLeads: leads.filter((lead) => lead.status === "live").length,
@@ -69,6 +103,7 @@ export function getMarketplaceMetrics() {
 
 export function getCeoOverview() {
   const metrics = getMarketplaceMetrics();
+
   return {
     marketplaceHealth: {
       leadsPerDay: metrics.leadsToday,
@@ -101,4 +136,3 @@ export function listAuditLogs() {
     createdAt: action.at
   }));
 }
-

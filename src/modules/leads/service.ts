@@ -1,6 +1,9 @@
-import { listPricingRules } from "@pricing/rules";
-import { applyPricingEngine } from "@pricing/engine";
-import { getPricingVersion } from "@pricing/versioning";
+import {
+  calculateDeterministicLeadPrice,
+  classifyLeadFromAnchor
+} from "../../pricing-engine/engine";
+
+import { getActivePricingRuleVersion } from "../../pricing-engine/versioning";
 
 const leads: Array<any> = [];
 
@@ -17,6 +20,12 @@ export function createLead(input: {
   professionalId: string;
   description: string;
   createdAt?: string;
+  jobSize?: string;
+  leadClass?: string;
+  distanceBand?: "local" | "regional" | "long_distance";
+  complexityBand?: "low" | "medium" | "high";
+  timingBand?: "flexible" | "normal" | "urgent";
+  qualityBand?: "standard" | "premium";
 }) {
   const lead = {
     id: makeId("lead"),
@@ -25,13 +34,26 @@ export function createLead(input: {
     description: input.description,
     createdAt: input.createdAt || new Date().toISOString(),
     status: "live",
-    pricing: null
+    pricingSnapshot: null,
+    eligibility: null
   };
 
   // Apply pricing engine
-  const rules = listPricingRules();
-  const version = getPricingVersion();
-  lead.pricing = applyPricingEngine(lead, rules, version);
+  const version = getActivePricingRuleVersion();
+
+  lead.pricingSnapshot = calculateDeterministicLeadPrice({
+    jobSize: input.jobSize ?? "small",
+    leadClass: input.leadClass ?? "standard",
+    distanceBand: input.distanceBand ?? "local",
+    complexityBand: input.complexityBand ?? "low",
+    timingBand: input.timingBand ?? "normal",
+    qualityBand: input.qualityBand ?? "standard"
+  });
+
+  lead.eligibility = {
+    eligible: true,
+    reasons: []
+  };
 
   leads.push(lead);
   return lead;
@@ -51,7 +73,7 @@ export function listRefunds() {
     .map((lead) => ({
       id: makeId("refund"),
       leadId: lead.id,
-      amount: lead.pricing?.finalPrice || 0,
+      amount: lead.pricingSnapshot?.priceGbp || 0,
       status: "pending",
       createdAt: new Date().toISOString()
     }));
