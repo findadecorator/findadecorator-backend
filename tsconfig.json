@@ -18,8 +18,7 @@
   },
 
   "include": [
-    "src/**/*",
-    "pricing-engine/**/*"
+    "src/**/*"
   ],
 
   "exclude": [

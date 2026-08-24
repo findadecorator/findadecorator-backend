@@ -1,7 +1,7 @@
 import { listAppeals, listReviews } from "../reviews/service";
 import { listRefunds as listLeadRefunds, listLeads } from "../leads/service";
 import { listRefunds as listBillingRefunds, listInvoices } from "../billing/service";
-import { listPricingRuleVersions } from "../../../pricing-engine/versioning";
+import { listPricingRuleVersions } from "../../pricing-engine/src/versioning";
 
 const verificationQueue: Array<{ id: string; professionalId: string; status: string }> = [];
 const queueActions: Array<{ queue: string; itemId: string; action: string; at: string }> = [];

@@ -1,11 +1,13 @@
 import {
   calculateDeterministicLeadPrice,
   classifyLeadFromAnchor
-} from "../../pricing-engine/engine";
+} from "../../pricing-engine/src/engine";
 
-import { getActivePricingRuleVersion } from "../../pricing-engine/versioning";
+import { getActivePricingRuleVersion } from "../../pricing-engine/src/versioning";
 
 const leads: Array<any> = [];
+const creditLedger = new Map<string, number>();
+const unlocks: Array<any> = [];
 
 function makeId(prefix: string) {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
@@ -13,6 +15,38 @@ function makeId(prefix: string) {
 
 export function listLeads() {
   return leads;
+}
+
+export function getCreditBalances(professionalId: string) {
+  return {
+    professionalId,
+    availableCredits: creditLedger.get(professionalId) ?? 0,
+    currency: "GBP"
+  };
+}
+
+export function topUpCredits(professionalId: string, credits: number, source: string) {
+  const balance = creditLedger.get(professionalId) ?? 0;
+  const nextBalance = balance + credits;
+  creditLedger.set(professionalId, nextBalance);
+  return {
+    professionalId,
+    addedCredits: credits,
+    balance: nextBalance,
+    source,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+export function grantSubscriptionCredits(professionalId: string, credits: number, source: string) {
+  return topUpCredits(professionalId, credits, source);
+}
+
+export function listLedger(professionalId?: string) {
+  if (!professionalId) {
+    return Array.from(creditLedger.entries()).map(([id, credits]) => ({ professionalId: id, credits }));
+  }
+  return [{ professionalId, credits: creditLedger.get(professionalId) ?? 0 }];
 }
 
 export function createLead(input: {
@@ -27,7 +61,7 @@ export function createLead(input: {
   timingBand?: "flexible" | "normal" | "urgent";
   qualityBand?: "standard" | "premium";
 }) {
-  const lead = {
+  const lead: any = {
     id: makeId("lead"),
     customerId: input.customerId,
     professionalId: input.professionalId,
@@ -38,12 +72,11 @@ export function createLead(input: {
     eligibility: null
   };
 
-  // Apply pricing engine
   const version = getActivePricingRuleVersion();
 
   lead.pricingSnapshot = calculateDeterministicLeadPrice({
-    jobSize: input.jobSize ?? "small",
-    leadClass: input.leadClass ?? "standard",
+    jobSize: (input.jobSize ?? "small") as any,
+    leadClass: (input.leadClass ?? "standard") as any,
     distanceBand: input.distanceBand ?? "local",
     complexityBand: input.complexityBand ?? "low",
     timingBand: input.timingBand ?? "normal",
@@ -57,6 +90,62 @@ export function createLead(input: {
 
   leads.push(lead);
   return lead;
+}
+
+export function previewLead(leadId: string, professionalId: string) {
+  const lead = leads.find((candidate) => candidate.id === leadId);
+  if (!lead) {
+    throw new Error("Lead not found");
+  }
+  return {
+    leadId: lead.id,
+    professionalId,
+    title: lead.description,
+    price: lead.pricingSnapshot?.priceGbp ?? 0,
+    eligible: lead.eligibility?.eligible ?? true,
+    classification: classifyLeadFromAnchor(lead.pricingSnapshot?.jobValueAnchorGbp ?? 0)
+  };
+}
+
+export function unlockLead(input: { leadId: string; professionalId: string; credits?: number }) {
+  const lead = leads.find((candidate) => candidate.id === input.leadId);
+  if (!lead) {
+    throw new Error("Lead not found");
+  }
+
+  const creditsNeeded = Math.max(1, Number(input.credits ?? 1));
+  const balance = creditLedger.get(input.professionalId) ?? 0;
+  if (balance < creditsNeeded) {
+    throw new Error("Insufficient credits");
+  }
+
+  creditLedger.set(input.professionalId, balance - creditsNeeded);
+  const unlock = {
+    id: makeId("unlock"),
+    leadId: input.leadId,
+    professionalId: input.professionalId,
+    creditsUsed: creditsNeeded,
+    status: "unlocked",
+    createdAt: new Date().toISOString()
+  };
+  unlocks.push(unlock);
+  return unlock;
+}
+
+export function requestRefund(unlockId: string, reason: string) {
+  const unlock = unlocks.find((entry) => entry.id === unlockId);
+  if (!unlock) {
+    throw new Error("Unlock not found");
+  }
+  const refund = {
+    id: makeId("refund"),
+    unlockId,
+    reason,
+    amountGbp: unlock.creditsUsed * 10,
+    status: "pending",
+    createdAt: new Date().toISOString()
+  };
+  return refund;
 }
 
 export function updateLeadStatus(leadId: string, status: string) {
