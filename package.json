@@ -4,6 +4,7 @@
   "private": true,
   "main": "dist/src/server.js",
   "scripts": {
+    "prebuild": "prisma generate",
     "build": "tsc -p tsconfig.json",
     "dev": "ts-node src/server.ts",
     "start": "node dist/find-a-decorator-backend/src/server.js",
