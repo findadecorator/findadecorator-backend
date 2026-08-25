@@ -7,7 +7,7 @@
     "prebuild": "prisma generate",
     "build": "tsc -p tsconfig.json",
     "dev": "ts-node src/server.ts",
-    "start": "node dist/find-a-decorator-backend/src/server.js",
+    "start": "node dist/server.js",
     "prisma": "prisma",
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema prisma/schema.prisma",
